@@ -44,7 +44,7 @@ function App() {
     // Using async await
 
     try{
-      const response = await fetch("https://swapi.dev/api/film/");
+      const response = await fetch("https://swapi.dev/api/films/");
 
       if(!response.ok){
         throw new Error('Something went wrong ...Retrying');
@@ -67,21 +67,30 @@ function App() {
     }
     setIsLoading(false);
 
-  });
+  },[]);
 
   useEffect(()=>{
-    const timer = setTimeout(()=>{
+    fetchMoviesHandler();
+  },[fetchMoviesHandler]);
+
+
+  useEffect(()=>{
+    if(error){
+      const timer = setTimeout(()=>{
         fetchMoviesHandler();
-    },5000);
-    return ()=>{
-      clearTimeout(timer);
+      },5000);
+      return ()=>{
+        clearTimeout(timer);
+      }
     }
-  },[error]);
+    
+  });
 
   const returnHandler = ()=>{
     setError(null);
     setIsLoading(false);
   }
+  
 
   let content = <p>Found no movies.</p>;
   if(movies.length > 0){
