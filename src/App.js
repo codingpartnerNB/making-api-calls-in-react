@@ -1,6 +1,7 @@
 import React, {useEffect, useState, useCallback} from 'react';
 
 import MoviesList from './components/MoviesList';
+import AddMovie from './components/AddMovie';
 import './App.css';
 
 function App() {
@@ -44,8 +45,8 @@ function App() {
     // Using async await
 
     try{
-      const response = await fetch("https://swapi.dev/api/films/");
-
+      const response = await fetch("https://swapi.dev/api/films/"); 
+      
       if(!response.ok){
         throw new Error('Something went wrong ...Retrying');
       }
@@ -86,6 +87,10 @@ function App() {
     
   });
 
+  const addMovieHandler = (movie)=>{
+    console.log(movie);
+  }
+
   const returnHandler = ()=>{
     setError(null);
     setIsLoading(false);
@@ -105,6 +110,9 @@ function App() {
 
   return (
     <React.Fragment>
+      <section>
+        <AddMovie onAddMovie={addMovieHandler} />
+      </section>
       <section>
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>
       </section>
