@@ -45,23 +45,35 @@ function App() {
     // Using async await
 
     try{
-      const response = await fetch("https://swapi.dev/api/films/"); 
-      
+      const response = await fetch("https://react-movies-4255c-default-rtdb.firebaseio.com/movies.json");  //https://swapi.dev/api/films/ 
+      //OR 
+      //https://console.firebase.google.com/project/react-movies-4255c/database/react-movies-4255c-default-rtdb/data/~2F
       if(!response.ok){
         throw new Error('Something went wrong ...Retrying');
       }
 
       const data = await response.json();
 
-      const transformedMovies = data.results.map(movieData => {
-        return {
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseDate: movieData.release_date
-        }
-      });
-      setMovies(transformedMovies);
+      const loadedMovies = [];
+
+      for(const key in data){
+        loadedMovies.push({
+          id: key,
+          title: data[key].title,
+          openingText: data[key].openingText,
+          releaseDate: data[key].releaseDate
+        })
+      }
+
+      // const transformedMovies = data.results.map(movieData => {
+      //   return {
+      //     id: movieData.episode_id,
+      //     title: movieData.title,
+      //     openingText: movieData.opening_crawl,
+      //     releaseDate: movieData.release_date
+      //   }
+      // });
+      setMovies(loadedMovies);
       
     }catch(error){
       setError(error.message);
@@ -87,19 +99,40 @@ function App() {
     
   });
 
-  const addMovieHandler = (movie)=>{
-    console.log(movie);
+  const addMovieHandler = async (movie)=>{
+    const response = await fetch("https://react-movies-4255c-default-rtdb.firebaseio.com/movies.json",{
+      method: "POST",
+      body: JSON.stringify(movie),
+      headers: {
+        'Content-Type': 'appication/json'
+      }
+    });
+    const data = await response.json();
+    console.log(data);
+    setMovies(prevMovie=>{
+      return [...prevMovie, {...movie, id: data.name}];
+    })
   }
 
   const returnHandler = ()=>{
     setError(null);
     setIsLoading(false);
   }
+
+  const deleteMovieHandler = async (id)=>{
+    console.log(id);
+    await fetch(`https://react-movies-4255c-default-rtdb.firebaseio.com/movies/${id}.json`,{  
+    method: "DELETE"
+    });
+    setMovies(prevList =>{
+      return prevList.filter(movieId=>movieId.id !== id);
+    })
+  }
   
 
   let content = <p>Found no movies.</p>;
   if(movies.length > 0){
-    content = <MoviesList movies={movies} />
+    content = <MoviesList movies={movies} onDelete={deleteMovieHandler} />
   }
   if(error){
     content = <p>{error}</p>
